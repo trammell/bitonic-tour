@@ -2,12 +2,15 @@ Build.PL
 Changes
 etc/bitonic-1.jpg
 etc/bitonic-2.jpg
+example/15-9.txt
+example/cb.pl
 lib/Cormen/Bitonic.pm
 Makefile.PL
 MANIFEST
 META.yml
 README
 t/00-load.t
+t/01-setup.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
