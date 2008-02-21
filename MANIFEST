@@ -1,0 +1,13 @@
+Build.PL
+Changes
+etc/bitonic-1.jpg
+etc/bitonic-2.jpg
+lib/Cormen/Bitonic.pm
+Makefile.PL
+MANIFEST
+META.yml
+README
+t/00-load.t
+t/boilerplate.t
+t/pod-coverage.t
+t/pod.t
