@@ -9,6 +9,7 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Cormen/Bitonic.pm',
     requires => {
         'Class::Accessor::Fast' => 0,
+        'List::Util' => 0,
         'Params::Validate' => 0,
     },
     build_requires => {

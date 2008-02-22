@@ -11,3 +11,5 @@ while (<>) {
     $b->add_point(split ' ', $_);
 }
 
+print $b->solve;
+

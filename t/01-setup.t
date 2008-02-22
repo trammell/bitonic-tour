@@ -2,20 +2,38 @@ use strict;
 use warnings;
 use Cormen::Bitonic;
 use Test::More 'no_plan';
+use Test::Exception;
 
 use_ok('Cormen::Bitonic');
 my $b = Cormen::Bitonic->new;
+is($b->n_points, 0);
+
 $b->add_point(0,0);
-is_deeply( [$b->points], [[0,0]] );
+is($b->n_points, 1);
+is_deeply( [$b->sorted_points], [[0,0]] );
 
 $b->add_point(3,0);
-is_deeply( [$b->points], [[0,0], [3,0]] );
+is($b->n_points, 2);
+is_deeply( [$b->sorted_points], [[0,0], [3,0]] );
 
 $b->add_point(2,1);
-is_deeply( [$b->points], [[0,0], [2,1], [3,0]] );
+is($b->n_points, 3);
+is_deeply( [$b->sorted_points], [[0,0], [2,1], [3,0]] );
 
 $b->add_point(1,1);
-is_deeply( [$b->points], [[0,0], [1,1], [2,1], [3,0]] );
+is($b->n_points, 4);
+is_deeply( [$b->sorted_points], [[0,0], [1,1], [2,1], [3,0]] );
+
+# try to add a bogus point
+
+{
+    dies_ok { $b->add_point(2,1) } 'repeated X-coordinate should die';
+    dies_ok { $b->add_point(2,2) } 'repeated X-coordinate should die';
+    dies_ok { $b->add_point(2,3) } 'repeated X-coordinate should die';
+    throws_ok { $b->add_point(2,1) } qr/duplicates previous point/,
+        'with a nice error message';
+}
+
 
 is_deeply( [$b->coord(0)], [ 0,0 ] );
 is_deeply( [$b->coord(-1)], [ 3,0 ] );

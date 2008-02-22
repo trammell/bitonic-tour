@@ -11,6 +11,8 @@ META.yml
 README
 t/00-load.t
 t/01-setup.t
+t/02-cost.t
+t/03-solve.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
