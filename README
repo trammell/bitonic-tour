@@ -1,8 +1,6 @@
-Cormen::Bitonic
+Algorithm::TravelingSalesman::BitonicTour
 
 This module is...
-
-
 
 INSTALLATION
 
@@ -18,21 +16,21 @@ SUPPORT AND DOCUMENTATION
 After installing, you can find documentation for this module with the
 perldoc command.
 
-    perldoc Cormen::Bitonic
+    perldoc Algorithm::TravelingSalesman::BitonicTour
 
 You can also look for information at:
 
     RT, CPAN's request tracker
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cormen-Bitonic
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Algorithm-TravelingSalesman-BitonicTour
 
     AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Cormen-Bitonic
+        http://annocpan.org/dist/Algorithm-TravelingSalesman-BitonicTour
 
     CPAN Ratings
-        http://cpanratings.perl.org/d/Cormen-Bitonic
+        http://cpanratings.perl.org/d/Algorithm-TravelingSalesman-BitonicTour
 
     Search CPAN
-        http://search.cpan.org/dist/Cormen-Bitonic
+        http://search.cpan.org/dist/Algorithm-TravelingSalesman-BitonicTour
 
 
 COPYRIGHT AND LICENCE
