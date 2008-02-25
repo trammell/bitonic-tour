@@ -1,9 +1,0 @@
-# Grid points from Cormen, Figure 15.9, p. 365.
-# Note that the points in this file are not in sorted order.
-0	6
-5	4
-7	5
-8	2
-6	1
-1	0
-2	3
