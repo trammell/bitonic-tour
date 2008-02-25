@@ -6,7 +6,7 @@ my $builder = Module::Build->new(
     module_name         => 'Cormen::Bitonic',
     license             => 'perl',
     dist_author         => 'John Trammell <johntrammell@gmail.com>',
-    dist_version_from   => 'lib/Cormen/Bitonic.pm',
+    dist_version_from   => 'lib/Algorithm/TravelingSalesman/BitonicTour.pm',
     requires => {
         'Class::Accessor::Fast' => 0,
         'List::Util' => 0,
@@ -18,7 +18,7 @@ my $builder = Module::Build->new(
         'Test::Pod' => 0,
         'Test::Pod::Coverage' => 0,
     },
-    add_to_cleanup      => [ 'Cormen-Bitonic-*', '*.bak' ],
+    add_to_cleanup      => [qw(Algorithm-* *.bak)],
 );
 
-$builder->create_build_script();
+$builder->create_build_script;
