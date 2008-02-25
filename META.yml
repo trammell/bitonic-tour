@@ -1,5 +1,5 @@
 ---
-name: Cormen-Bitonic
+name: Algorithm-TravelingSalesman-BitonicTour
 version: 0.001
 author:
   - 'John Trammell <johntrammell@gmail.com>'
@@ -17,8 +17,8 @@ build_requires:
   Test::Pod: 0
   Test::Pod::Coverage: 0
 provides:
-  Cormen::Bitonic:
-    file: lib/Cormen/Bitonic.pm
+  Algorithm::TravelingSalesman::BitonicTour:
+    file: lib/Algorithm/TravelingSalesman/BitonicTour.pm
     version: 0.001
 generated_by: Module::Build version 0.2808
 meta-spec:
