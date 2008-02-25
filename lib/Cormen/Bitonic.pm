@@ -1,4 +1,4 @@
-package Cormen::Bitonic;
+package Algorithm::TravelingSalesman::BitonicTour;
 
 use strict;
 use warnings FATAL => 'all';
@@ -10,19 +10,19 @@ use Regexp::Common qw/ number /;
 
 our $VERSION = '0.001';
 
-Cormen::Bitonic->mk_accessors(qw/ _coord _cost min_tour _points _sorted_points /);
+Algorithm::TravelingSalesman::BitonicTour->mk_accessors(qw/ _coord _cost min_tour _points _sorted_points /);
 
 =head1 NAME
 
-Cormen::Bitonic - solve the euclidean traveling-salesman problem with bitonic tours
+Algorithm::TravelingSalesman::BitonicTour - solve the euclidean traveling-salesman problem with bitonic tours
 
 =cut
 
 =head1 SYNOPSIS
 
-    use Cormen::Bitonic;
+    use Algorithm::TravelingSalesman::BitonicTour;
 
-    my $b = Cormen::Bitonic->new;
+    my $b = Algorithm::TravelingSalesman::BitonicTour->new;
     $b->add_point($x1,$y2);
     $b->add_point($x2,$y2);
     # ...add other points as needed...
@@ -111,9 +111,9 @@ B<>
 
 =head1 METHODS
 
-=head2 Cormen::Bitonic->new()
+=head2 Algorithm::TravelingSalesman::BitonicTour->new()
 
-Constructs a new C<Cormen::Bitonic> solution object.
+Constructs a new C<Algorithm::TravelingSalesman::BitonicTour> solution object.
 
 =cut
 
@@ -397,7 +397,7 @@ John Trammell, C<< <johntrammell at gmail.com> >>
 
 Please report any bugs or feature requests to C<bug-cormen-bitonic at rt.cpan.org>,
 or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Cormen-Bitonic>.  I will be
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Algorithm-TravelingSalesman-BitonicTour>.  I will be
 notified, and then you'll automatically be notified of progress on your bug as
 I make changes.
 
@@ -405,7 +405,7 @@ I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Cormen::Bitonic
+    perldoc Algorithm::TravelingSalesman::BitonicTour
 
 You can also look for information at:
 
@@ -413,19 +413,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Cormen-Bitonic>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Algorithm-TravelingSalesman-BitonicTour>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Cormen-Bitonic>
+L<http://annocpan.org/dist/Algorithm-TravelingSalesman-BitonicTour>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Cormen-Bitonic>
+L<http://cpanratings.perl.org/d/Algorithm-TravelingSalesman-BitonicTour>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Cormen-Bitonic>
+L<http://search.cpan.org/dist/Algorithm-TravelingSalesman-BitonicTour>
 
 =back
 

@@ -1,11 +1,11 @@
 use strict;
 use warnings;
-use Cormen::Bitonic;
+use Algorithm::TravelingSalesman::BitonicTour;
 use Test::More 'no_plan';
 use Test::Exception;
 
-use_ok('Cormen::Bitonic');
-my $b = Cormen::Bitonic->new;
+use_ok('Algorithm::TravelingSalesman::BitonicTour');
+my $b = Algorithm::TravelingSalesman::BitonicTour->new;
 is($b->n_points, 0);
 
 $b->add_point(0,0);

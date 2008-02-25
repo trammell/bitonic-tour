@@ -3,7 +3,7 @@
 use Test::More tests => 1;
 
 BEGIN {
-	use_ok( 'Cormen::Bitonic' );
+	use_ok( 'Algorithm::TravelingSalesman::BitonicTour' );
 }
 
-diag( "Testing Cormen::Bitonic $Cormen::Bitonic::VERSION, Perl $], $^X" );
+diag( "Testing Algorithm::TravelingSalesman::BitonicTour $Algorithm::TravelingSalesman::BitonicTour::VERSION, Perl $], $^X" );

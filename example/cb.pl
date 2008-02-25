@@ -2,9 +2,9 @@
 
 use strict;
 use warnings;
-use Cormen::Bitonic;
+use Algorithm::TravelingSalesman::BitonicTour;
 
-my $b = Cormen::Bitonic->new;
+my $b = Algorithm::TravelingSalesman::BitonicTour->new;
 while (<>) {
     next if /^#/;
     next unless /\S/;

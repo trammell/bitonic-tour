@@ -45,5 +45,5 @@ not_in_file_ok(Changes =>
     "placeholder date/time"       => qr(Date/time)
 );
 
-module_boilerplate_ok('lib/Cormen/Bitonic.pm');
+module_boilerplate_ok('lib/Algorithm/TravelingSalesman/BitonicTour.pm');
 

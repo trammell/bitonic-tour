@@ -1,15 +1,15 @@
 use strict;
 use warnings;
-use Cormen::Bitonic;
+use Algorithm::TravelingSalesman::BitonicTour;
 use Data::Dumper;
 use Test::More 'no_plan';
 use Test::Exception;
 
-use_ok('Cormen::Bitonic');
+use_ok('Algorithm::TravelingSalesman::BitonicTour');
 
 # make sure an attempt to solve a problem with no points dies
 {
-    my $b = Cormen::Bitonic->new;
+    my $b = Algorithm::TravelingSalesman::BitonicTour->new;
     throws_ok { $b->solve } qr/need to add some points/,
         'bad problem throws exception';
 #   diag Dumper($b);
@@ -17,7 +17,7 @@ use_ok('Cormen::Bitonic');
 
 # make sure a problem with exactly one point works
 {
-    my $b = Cormen::Bitonic->new;
+    my $b = Algorithm::TravelingSalesman::BitonicTour->new;
     $b->add_point(0,0);
     my $solution;
     lives_ok { $solution = $b->solve };
@@ -26,7 +26,7 @@ use_ok('Cormen::Bitonic');
 
 
 # # now solve a real problem
-# my $b = Cormen::Bitonic->new;
+# my $b = Algorithm::TravelingSalesman::BitonicTour->new;
 # $b->add_point(0,0);
 # $b->add_point(1,1);
 # $b->add_point(2,1);

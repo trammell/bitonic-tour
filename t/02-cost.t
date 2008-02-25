@@ -5,10 +5,10 @@ use Test::More 'no_plan';
 use Test::Exception;
 
 local $Data::Dumper::Sortkeys = 1;
-use_ok('Cormen::Bitonic');
+use_ok('Algorithm::TravelingSalesman::BitonicTour');
 
 # set up a problem
-my $b = Cormen::Bitonic->new;
+my $b = Algorithm::TravelingSalesman::BitonicTour->new;
 $b->add_point(0,0);
 $b->add_point(1,1);
 $b->add_point(2,1);
