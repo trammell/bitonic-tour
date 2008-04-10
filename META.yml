@@ -2,7 +2,7 @@
 name: Algorithm-TravelingSalesman-BitonicTour
 version: 0.01
 author:
-  - 'John Trammell <johntrammell@gmail.com>'
+  - 'John Trammell <johntrammell -at- gmail.com>'
 abstract: solve the euclidean traveling-salesman problem with bitonic tours
 license: perl
 resources:
