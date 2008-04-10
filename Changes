@@ -1,6 +1,5 @@
 Revision history for Algorithm::TravelingSalesman::BitonicTour
 
-0.001   Thu Feb 21 09:15:57 CST 2008
-
-   * initial module
+0.01	Thu Feb 21 09:15:57 CST 2008
+    * initial release
 
