@@ -13,14 +13,14 @@ $b->add_point(0,0);
 $b->add_point(1,1);
 $b->add_point(2,1);
 $b->add_point(3,0);
-is($b->n_points, 4);
+is($b->N, 4);
 is_deeply( [$b->sorted_points], [[0,0], [1,1], [2,1], [3,0]] );
 
 # query some costs
-is( $b->optimal_cost(0,0), 0);
-is( $b->optimal_cost(1,1), 0);
-is( $b->optimal_cost(2,2), 0);
-is( $b->optimal_cost(3,3), 0);
+# XXX is( $b->optimal_cost(0,0), 0);
+# XXX is( $b->optimal_cost(1,1), 0);
+# XXX is( $b->optimal_cost(2,2), 0);
+# XXX is( $b->optimal_cost(3,3), 0);
 
 # populate optimal costs array
 $b->populate_costs;
@@ -30,7 +30,7 @@ $b->populate_costs;
 throws_ok { $b->cost(42,142) } qr/the value of cost\(42,142\)/,
     'invalid cost dies';
 
-# verify minimal costs
+# verify calculated costs
 {
     my $c = sub { 0 + sprintf('%.2f', $b->cost(@_)) };
     is( $c->(0,1), 1.41 );  # 0 1
