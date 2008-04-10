@@ -8,9 +8,9 @@ use List::Util 'reduce';
 use Params::Validate qw/ validate_pos SCALAR /;
 use Regexp::Common qw/ number /;
 
-our $VERSION = '0.001';
+our $VERSION = '0.01';
 
-Algorithm::TravelingSalesman::BitonicTour->mk_accessors(qw/ _coord _cost min_tour _points _sorted_points /);
+__PACKAGE__->mk_accessors(qw/ _coord _cost min_tour _points _sorted_points /);
 
 =head1 NAME
 
@@ -30,9 +30,10 @@ Algorithm::TravelingSalesman::BitonicTour - solve the euclidean traveling-salesm
     my $solution = $b->solve;
     print $solution;
 
-=head1 DESCRIPTION
+=head1 THE PROBLEM
 
-From Cormen, Chapter 15, pages 364-365:
+From I<Introduction to Algorithms>, 2nd ed., T. H. Cormen, C. E. Leiserson, R.
+Rivest, and C. Stein, MIT Press, 2001, problem 15-1, p. 364:
 
 =over 4
 
@@ -42,7 +43,7 @@ Figure 15.9(a) shows the solution to a 7-point problem.  The general problem is
 NP-complete, and its solution is therefore believed to require more than
 polynomial time (see Chapter 34).
 
-J. L. Bentley has suggested that we simplify the problem by restricting our
+J. L. Bentley has suggested[2] that we simplify the problem by restricting our
 attention to B<bitonic tours>, that is, tours that start at the leftmost point,
 go strictly left to right to the rightmost point, and then go strictly right to
 left back to the starting point.  Figure 15.9(b) shows the shortest bitonic
@@ -56,20 +57,42 @@ tour.)
 
 =back
 
-The solution to this problem eluded me when I first saw it; I wanted to solve
-it in my own idiom.
+From wikipedia:
+
+=over 4
+
+In computational geometry, a I<bitonic tour> of a set of point sites in the
+Euclidean plane is a closed polygonal chain that has each site as one of its
+vertices, such that any vertical line crosses the chain at most twice.
+
+=back
 
 =head1 THE SOLUTION
+
+=head2 Overlapping Subproblems
+
+=head2 Optimal Substructure
+
+The solution to this problem eluded me when I first saw it.  I wanted to solve
+it in my own idiom.
 
 =head2 Insight #1
 
 B<The cost structure stores the cost of a tour>.
 
-    c[i,j] = cost of a tour from point i => leftmost point => point j
+=over 4
+
+C<cost(i,j)> = the cost of a B<partial bitonic tour> from point C<i> through the leftmost
+point to point C<j>.  The fact that this is a bitonic tour implies:
+
+  * all points to the left of C<j> are included in tour(i,j)
+
+=back
 
 =head2 Insight #2
 
-B<>
+
+=head2 Recurrence
 
 
     Why will they let us assume that no two x-coordinates are the same? What
@@ -101,8 +124,6 @@ B<>
 
         Tour Cost = min[k=1..n]{ c[k,n] + d[k,n] }
 
-
-
 ===============
 
     A[i,j] = A[i,j-1] + d(j-1,j)                 if j >= i+2
@@ -114,6 +135,10 @@ B<>
 =head2 Algorithm::TravelingSalesman::BitonicTour->new()
 
 Constructs a new C<Algorithm::TravelingSalesman::BitonicTour> solution object.
+
+Example:
+
+    my $ts = Algorithm::TravelingSalesman::BitonicTour->new;
 
 =cut
 
@@ -127,15 +152,17 @@ sub new {
     return $self;
 }
 
-=head2 $b->add_point($x,$y)
+=head2 $ts->add_point($x,$y)
 
-Adds a point to be included in the solution.  Method C<add_point()> checks to
-make sure that no two points have the same I<x>-coordinate.  This method will
-C<croak()> if anything goes wrong.
+Adds a point at position (C<$x>, C<$y>) to be included in the solution.  Method
+C<add_point()> checks to make sure that no two points have the same
+I<x>-coordinate.  This method will C<croak()> with a descriptive error message
+if anything goes wrong.
 
 Example:
 
-    $b->add_point(2,3);  # adds point (x=2, y=3) to the tour
+    # add point at coordinates (x=2, y=3) to the tour
+    $ts->add_point(2,3);
 
 =cut
 
@@ -148,38 +175,59 @@ sub add_point {
         croak "FAIL: point ($x,$y) duplicates previous point ($x,$py)";
     }
     else {
+        $self->_sorted_points(undef);   # clear any previous cache of sorted points
         $self->_points->{$x} = $y;
-        $self->_sorted_points(undef);   # clear cache
         return [$x, $y];
     }
 }
 
-=head2 coord($n)
+=head2 $ts->N()
 
-Returns an array containing the coordinates of point C<$n>.
+Returns the number of points currently stored in the solution object.
 
-Examples:
+Example:
 
-    my ($x0, $y0) = $b->coord(0);   # coordinates of leftmost point
-    my ($x1, $y1) = $b->coord(1);   # coordinates of next point
-    # ...
-    my ($xn, $yn) = $b->coord(-1);  # coordinates of rightmost point
+    print "I have %d points.\n", $ts->N;
 
 =cut
 
-sub coord {
-    my ($self, $n) = @_;
-    return @{ ($self->sorted_points)[$n] };
+sub N {
+    my $self = shift;
+    return scalar keys %{ $self->_points };
 }
 
-=head2 $b->sorted_points()
+=head2 $ts->R()
 
-Returns an array of points sorted by increasing I<x>-coordinate, i.e. the first
-array element is the leftmost point.  Each point is represented as an arrayref
-containing 2 elements.
+Returns the index of the rightmost point currently stored in the solution
+object.  This is always one less than C<$ts->N>.
 
-The sorted array of points is cached, but the cache is cleared by each call to
-add_point().
+=cut
+
+sub R {
+    my $self = shift;
+    my $n = $self->N;
+    die "No rightmost point in problem (N = $n)" if $n < 1;
+    return $n - 1;
+}
+
+
+=head2 $ts->sorted_points()
+
+Returns an array of points sorted by increasing I<x>-coordinate.  The first
+array element is thus the leftmost point in the problem.
+
+Each point is represented as an arrayref containing 2 elements.  The sorted
+array of points is cached, but the cache is cleared by each call to
+C<add_point()>.
+
+Example:
+
+    my $ts = Algorithm::TravelingSalesman::BitonicTour->new;
+    $ts->add_point(1,1);
+    $ts->add_point(0,0);    # this is the leftmost point
+    $ts->add_point(2,0);
+    # get the coordinates of the leftmost point
+    my $first = ($ts->sorted_points())[0];  # should be [0,0]
 
 =cut
 
@@ -193,32 +241,43 @@ sub sorted_points {
     return @{ $self->_sorted_points };
 }
 
-=head2 $b->n_points()
+=head2 coord($n)
 
-Returns the number of points currently stored in the solution object.
+Returns an array containing the coordinates of point C<$n>.
+
+Examples:
+
+    my ($x0, $y0) = $ts->coord(0);   # coordinates of leftmost point
+    my ($x1, $y1) = $ts->coord(1);   # coordinates of next point
+    # ...
+    my ($xn, $yn) = $ts->coord(-1);  # coordinates of rightmost point
 
 =cut
 
-sub n_points {
-    my $self = shift;
-    return scalar keys %{ $self->_points };
+sub coord {
+    my ($self, $n) = @_;
+    return @{ ($self->sorted_points)[$n] };
 }
 
-=head2 $b->solve()
+=head2 $ts->solve()
 
 Solves the problem as configured.  See L</"THE SOLUTION"> above for algorithm
 details.
 
-Returns the length of the minimum tour.
+Returns a number equal to the length of the minimum tour.
+
+Example:
+
+    my $tour_length = $ts->solve();
 
 =cut
 
 sub solve {
     my $self = shift;
-    if ($self->n_points < 1) {
+    if ($self->N < 1) {
         croak "FAIL: you need to add some points!";
     }
-    elsif ($self->n_points == 1) {
+    elsif ($self->N == 1) {
         return 0;
     }
     else {
@@ -227,20 +286,23 @@ sub solve {
     }
 }
 
-=head2 $b->populate_costs
+=head2 $ts->populate_costs
+
+Populates internal data structure C<cost($i,$j)> containing optimal tour costs.
 
 =cut
 
 sub populate_costs {
     my $self = shift;
-    my $R = $self->n_points - 1;    # mnemonic: index of Rightmost point
 
-    # ugly hack: cost(0,1) is equal to delta(0,1); doing this makes later loop
-    # indices
+    # Set cost(0,1) is equal to delta(0,1).  This correctness of this cost
+    # follows from the problem definition, and doing this simplifies future
+    # loop ranges. (I have mixed feelings about this step; it would be nice if
+    # this was handled by a more subtle choice of loop indices.)
     $self->set_cost(0, 1, $self->delta(0,1) );
 
     # find optimal tours for all points 2, 3, ... up to R
-    foreach my $k (2 .. $R) {
+    foreach my $k (2 .. $self->R) {
 
         # for each point "i" to the left of "k", calculate and save the optimal
         # tour cost from "i" to "k".
@@ -251,7 +313,7 @@ sub populate_costs {
     }
 }
 
-=head2 $b->optimal_tour
+=head2 $ts->optimal_tour
 
 Find the optimal complete tour by finding the minimum value of
 
@@ -266,17 +328,16 @@ cost(i,N) + delta(i,N)
 sub optimal_tour {
     my $self = shift;
     unless (defined $self->min_tour) {
-        my $R = $self->n_points - 1;    # mnemonic: index of Rightmost point
         my @tours = map {
-            $self->cost($_,$R) + $self->delta($_,$R);
-        } 0 .. $R - 1;
+            $self->cost($_,$self->R) + $self->delta($_,$self->R);
+        } 0 .. $self->R - 1;
         my $tour = reduce { $a < $b ? $a : $b } @tours;
         $self->min_tour($tour);
     }
     return $self->min_tour;
 }
 
-=head2 $b->optimal_cost($i,$j)
+=head2 $ts->optimal_cost($i,$j)
 
 Two cases, ($i < $j - 1) and ($i = $j - 1)
 
@@ -286,24 +347,17 @@ Two cases, ($i < $j - 1) and ($i = $j - 1)
 Example:
 
     # determine the cost of 
-    my $cost = $b->optimal_cost(20,25);
+    my $cost = $ts->optimal_cost(20,25);
 
 =cut
 
 sub optimal_cost {
     my ($self, $i, $j) = @_;
+    local $" = q(,);
 
-    # assert that $i <= $j
-    unless ($i <= $j) {
-        local $" = q(,);
-        croak "bad call: optimal_cost(@_)";
-    }
-
-    # the cost to go from a point to itself is zero
-    if ($i == $j) {
-        local $" = q(,);
-        return 0;
-    }
+    # we want $i to be strictly less than $j (we can actually be more lax with
+    # the inputs, but this assertion simplifies things)
+    croak "bad call: optimal_cost(@_)" unless $i < $j;
 
     # if $i and $j are adjacent, many valid bitonic tours (i => x => j) are
     # possible; choose the shortest one.
@@ -311,20 +365,18 @@ sub optimal_cost {
         my @costs = map {
             my $x = $_;
             my $cost = $self->cost($x,$i) + $self->delta($x,$j);
-            $cost;
         } 0 .. $i - 1;
         my $min_cost = reduce { $a < $b ? $a : $b } @costs;
         return $min_cost;
     }
 
-    # if $i and $j are not adjacent, then only one bitonic tour (i => j-1 => j)
+    # if $i and $j are NOT adjacent, then only one bitonic tour (i => j-1 => j)
     # is possible.   FIXME: needs pointer to documentation
     if ($i + 1 < $j) {
         return $self->cost($i, $j - 1)+ $self->delta($j - 1,$j);
     }
 
-    local $" = q(,);
-    croak "bad call to optimal_cost(@_)";
+    croak "bad call: optimal_cost(@_)";
 }
 
 
@@ -342,15 +394,25 @@ sub cost {
     return $self->_cost->{$i}{$j};
 }
 
-=head2 $b->set_cost($k, $n, $cost)
+=head2 $b->set_cost($i,$j,$cost)
 
-Sets the cost associated with the tour with endpoints C<$k> and C<$n>.
+Sets the cost associated with the tour with endpoints C<$i> and C<$j>.
 
 =cut
 
 sub set_cost {
     my ($self, $i, $j, $cost) = @_;
-    $self->_cost->{$i}{$j} = $self->_cost->{$j}{$i} = $cost;
+    unless ($cost > 0) {
+        croak "ERROR: set_cost($i,$j,$cost) ($cost <= 0)";
+    }
+    unless ($i < $j) {
+        croak "ERROR: set_cost($i,$j,$cost) ($i >= $j)";
+    }
+    unless ($j < $self->N) {
+        my $N = $self->N;
+        croak "ERROR: set_cost($i,$j,$cost) ($j >= $N)";
+    }
+    $self->_cost->{$i}{$j} = $cost;
 }
 
 =head2 $b->delta($n1,$n2);
@@ -370,22 +432,46 @@ sub delta {
     my ($self, $n1, $n2) = @_;
     my ($x1, $y1) = $self->coord($n1);
     my ($x2, $y2) = $self->coord($n2);
-    return sqrt(
-        (($x1 - $x2) * ($x1 - $x2))
-        + 
-        (($y1 - $y2) * ($y1 - $y2))
-    );
+    return sqrt((($x1-$x2)*($x1-$x2))+(($y1-$y2)*($y1-$y2)));
+}
+
+=head2 $bt->as_string()
+
+=cut
+
+sub as_string {
+    my $self = shift;
+    foreach my $i (0 .. $self->N - 1) {
+
+    }
+
+
+
 }
 
 =head1 RESOURCES
 
 =over 4
 
-=item
+=item [1]
 
 Cormen, Thomas H.; Leiserson, Charles E.; Rivest, Ronald L.; Stein, Clifford
 (2001). Introduction to Algorithms, second edition, MIT Press and McGraw-Hill.
 ISBN 978-0-262-53196-2. 
+
+=item [2]
+
+Bentley, Jon L. (1990), "Experiments on traveling salesman heuristics", Proc.
+1st ACM-SIAM Symp. Discrete Algorithms (SODA), pp. 91–99,
+L<http://portal.acm.org/citation.cfm?id=320186>.
+
+=item [3]
+
+L<http://en.wikipedia.org/wiki/Bitonic_tour>
+
+=item [4]
+
+L<http://en.wikipedia.org/wiki/Traveling_salesman_problem>
 
 =back
 
