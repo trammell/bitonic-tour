@@ -2,7 +2,6 @@ Build.PL
 Changes
 etc/bitonic-1.jpg
 etc/bitonic-2.jpg
-example/15-9.txt
 example/cb.pl
 lib/Algorithm/TravelingSalesman/BitonicTour.pm
 Makefile.PL
