@@ -12,13 +12,13 @@ use_ok('Algorithm::TravelingSalesman::BitonicTour');
     my $b = Algorithm::TravelingSalesman::BitonicTour->new;
     throws_ok { $b->solve } qr/need to add some points/,
         'bad problem throws exception';
-#   diag Dumper($b);
 }
 
-# make sure a problem with exactly one point works
-{
+# make sure a problem with exactly one point "works"
+for (1 .. 10) {
     my $b = Algorithm::TravelingSalesman::BitonicTour->new;
-    $b->add_point(0,0);
+    my ($x, $y) = map { 10 - rand(20) } 1, 2;
+    $b->add_point($x,$y);
     my $solution;
     lives_ok { $solution = $b->solve };
     is($solution, 0) or diag(Dumper($b));
