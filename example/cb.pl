@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use lib qw( ../lib lib );
 use Algorithm::TravelingSalesman::BitonicTour;
 
 my $b = Algorithm::TravelingSalesman::BitonicTour->new;
