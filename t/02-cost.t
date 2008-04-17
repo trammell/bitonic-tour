@@ -16,18 +16,12 @@ $b->add_point(3,0);
 is($b->N, 4);
 is_deeply( [$b->sorted_points], [[0,0], [1,1], [2,1], [3,0]] );
 
-# query some costs
-# XXX is( $b->optimal_cost(0,0), 0);
-# XXX is( $b->optimal_cost(1,1), 0);
-# XXX is( $b->optimal_cost(2,2), 0);
-# XXX is( $b->optimal_cost(3,3), 0);
-
 # populate optimal costs array
-$b->populate_costs;
+$b->populate_partial_tours;
 #diag(Dumper($b));
 
 # make sure invalid cost queries throw an exception
-throws_ok { $b->cost(42,142) } qr/the value of cost\(42,142\)/,
+throws_ok { $b->cost(42,142) } qr/Don't know the cost of tour\(42,142\)/,
     'invalid cost dies';
 
 # verify calculated costs

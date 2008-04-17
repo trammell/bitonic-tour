@@ -10,7 +10,7 @@ use Regexp::Common qw/ number /;
 
 our $VERSION = '0.01';
 
-__PACKAGE__->mk_accessors(qw/ _coord _cost min_tour _points _sorted_points /);
+__PACKAGE__->mk_accessors(qw/ _coord min_tour _points _sorted_points _tour /);
 
 =head1 NAME
 
@@ -149,7 +149,7 @@ Example:
 sub new {
     my $class = shift;
     my %new = (
-        _cost   => {},
+        _tour   => {},
         _points => {},
     );
     my $self = bless \%new, $class;
@@ -276,51 +276,20 @@ Example:
 
 sub solve {
     my $self = shift;
-    my %sol;
+    my ($length, @points);
     if ($self->N < 1) {
         croak "FAIL: you need to add some points!";
     }
     elsif ($self->N == 1) {
-        $sol{distance} = 0;
+        $length = 0;
     }
     else {
-        $self->populate_costs;
-        $sol{distance} = $self->optimal_tour_length;
-        $sol{points}   = $self->optimal_tour_points;
+        ($length, @points) = $self->optimal_full_tour;
     }
-    return Algorithm::TravelingSalesman::BitonicTour::Solution->new(\%sol);
+    return ($length, @points);
 }
 
-=head2 $ts->populate_costs
-
-Populates internal data structure C<cost($i,$j)> containing optimal tour costs.
-
-=cut
-
-sub populate_costs {
-    my $self = shift;
-
-    # Set cost(0,1) is equal to delta(0,1).  This correctness of this cost
-    # follows from the problem definition, and doing this simplifies future
-    # loop ranges. (I have mixed feelings about this step; it would be nice if
-    # this was handled by a more subtle choice of loop indices.)
-    $self->set_cost(0, 1, $self->delta(0,1) );
-
-    # find optimal tours for all points 2, 3, ... up to R
-    foreach my $k (2 .. $self->R) {
-
-        # for each point "i" to the left of "k", calculate and save the optimal
-        # tour cost from "i" to "k".
-        foreach my $i (0 .. $k - 1) {
-            my $cost = $self->optimal_cost($i,$k);
-            my @tour = $self->optimal_tour($i,$k);
-            $self->set_cost($i, $k, $cost);
-            $self->set_tour($i, $k, @tour);
-        }
-    }
-}
-
-=head2 $ts->optimal_tour_length
+=head2 $ts->optimal_full_tour
 
 Find the length of the optimal complete bitonic tour by finding the minimum
 value of
@@ -331,14 +300,11 @@ min{ i = 0 ..  }( cost(i,N) + delta(i,N) )
 
 =back
 
-
-
-
-
 =cut
 
-sub optimal_tour_length {
+sub optimal_full_tour {
     my $self = shift;
+    $self->populate_partial_tours;
     unless (defined $self->min_tour) {
         my @tours = map {
             $self->cost($_,$self->R) + $self->delta($_,$self->R);
@@ -349,7 +315,40 @@ sub optimal_tour_length {
     return $self->min_tour;
 }
 
-=head2 $ts->optimal_cost($i,$j)
+=head2 $ts->populate_partial_tours
+
+Populates internal data structure C<cost($i,$j)> containing optimal partial
+tour costs and paths.
+
+=cut
+
+sub populate_partial_tours {
+    my $self = shift;
+
+    # Set cost(0,1) is equal to delta(0,1).  This correctness of this cost
+    # follows from the problem definition, and doing this simplifies future
+    # loop ranges. (I have mixed feelings about this step; it would be nice if
+    # this was handled by a more subtle choice of loop indices.)
+    $self->set_cost(0, 1, $self->delta(0,1) );
+    $self->set_points(0, 1, 0, 1);
+
+    # find optimal tours for all points 2, 3, ... up to R
+    foreach my $k (2 .. $self->R) {
+
+        # for each point "i" to the left of "k", find (and save) the optimal
+        # partial bitonic tour from "i" to "k".
+        foreach my $i (0 .. $k - 1) {
+            my ($cost, @points) = $self->optimal_partial_tour($i,$k);
+            $self->set_cost($i, $k, $cost);
+            $self->set_points($i, $k, @points);
+        }
+    }
+}
+
+=head2 $ts->optimal_partial_tour($i,$j)
+
+Determines the optimal partial tour from point C<$i> to point C<$j>, based on
+the values of previously calculated optimal tours.
 
 Two cases, ($i < $j - 1) and ($i = $j - 1)
 
@@ -363,88 +362,137 @@ Example:
 
 =cut
 
-sub optimal_cost {
+sub optimal_partial_tour {
     my ($self, $i, $j) = @_;
     local $" = q(,);
 
     # we want $i to be strictly less than $j (we can actually be more lax with
     # the inputs, but this stricture simplifies things)
-    croak "ERROR: bad arguments to optimal_cost(@_)" unless $i < $j;
+    croak "ERROR: bad call, optimal_partial_tour(@_)" unless $i < $j;
 
     # if $i and $j are adjacent, many valid bitonic tours (i => x => j) are
     # possible; choose the shortest one.
-    return $self->_optimal_cost_adjacent($i, $j) if $i + 1 == $j;
+    return $self->_optimal_partial_tour_adjacent($i, $j) if $i + 1 == $j;
 
     # if $i and $j are NOT adjacent, then only one bitonic tour (i => j-1 => j)
     # is possible.   FIXME: needs pointer to documentation
-    return $self->_optimal_cost_nonadjacent($i, $j) if $i + 1 < $j;
+    return $self->_optimal_partial_tour_nonadjacent($i, $j) if $i + 1 < $j;
 
-    croak "bad call: optimal_cost(@_)";
+    croak "ERROR: bad call, optimal_partial_tour(@_)";
 }
 
-=head2 $obj->_optimal_cost_adjacent
+=head2 $obj->_optimal_partial_tour_adjacent
 
 =cut
 
-sub _optimal_cost_adjacent {
+sub _optimal_partial_tour_adjacent {
     my ($self, $i, $j) = @_;
-    my @costs = map {
+    my @tours = map {
         my $x = $_;
         my $cost = $self->cost($x,$i) + $self->delta($x,$j);
+        my @path = reverse($j, $self->points($x, $i) );
+        [ $cost, @path ];
     } 0 .. $i - 1;
-    my $min_cost = reduce { $a < $b ? $a : $b } @costs;
-    return $min_cost;
+    my $min_tour = reduce { $a->[0] < $b->[0] ? $a : $b } @tours;
+    return @$min_tour;
 }
 
-=head2 $obj->_optimal_cost_nonadjacent
+=head2 $obj->_optimal_partial_tour_nonadjacent
+
+If $i and $j are not adjacent, then only one valid partial bitonic tour
+(C<< i => j-1 => j >>) exists.
+
+FIXME: need pointer to documentation!
 
 =cut
 
-sub _optimal_cost_nonadjacent {
+sub _optimal_partial_tour_nonadjacent {
     my ($self, $i, $j) = @_;
+    my $cost = $self->cost($i, $j - 1)+ $self->delta($j - 1,$j);
+    my @points = ($self->points($i, $j - 1), $j);
+    return($cost, @points);
+}
 
-    # if $i and $j are NOT adjacent, then only one bitonic tour (i => j-1 => j)
-    # is possible.   FIXME: needs pointer to documentation
 
-    return $self->cost($i, $j - 1)+ $self->delta($j - 1,$j);
+=head2 $b->tour($i,$j)
 
-#    [ $self->tour($i, $j - 1)
+Returns the structure associated with the optimal bitonic tour from point C<$i>
+to C<$j>.  This is a hashref with keys C<cost> and C<points>.
 
+=cut
+
+sub tour {
+    my ($self, $i, $j) = @_;
+    unless (exists $self->_tour->{$i}{$j}) {
+        croak "No data available for tour($i,$j)";
+    }
+    return $self->_tour->{$i}{$j};
 }
 
 =head2 $b->cost($i,$j)
 
-Returns the cost associated with the bitonic tour from point C<$i> to C<$j>.
+Returns the cost of the bitonic tour from point C<$i> to C<$j>.
 
 =cut
 
 sub cost {
     my ($self, $i, $j) = @_;
-    unless (exists $self->_cost->{$i}{$j}) {
-        croak "Don't know the value of cost($i,$j)";
-    }
-    return $self->_cost->{$i}{$j};
+    croak "Don't know the cost of tour($i,$j)"
+        unless exists $self->_tour->{$i}{$j}{cost};
+    return $self->_tour->{$i}{$j}{cost};
 }
 
 =head2 $b->set_cost($i,$j,$cost)
 
-Sets the cost associated with the tour with endpoints C<$i> and C<$j>.
+Sets the cost of the tour with endpoints C<$i> and C<$j>.
 
 =cut
 
 sub set_cost {
     my ($self, $i, $j, $cost) = @_;
-    unless ($cost > 0) {
-        croak "ERROR: set_cost($i,$j,$cost) ($cost <= 0)";
-    }
-    unless ($i < $j) {
-        croak "ERROR: set_cost($i,$j,$cost) ($i >= $j)";
-    }
-    unless ($j < $self->N) {
-        my $N = $self->N;
-        croak "ERROR: set_cost($i,$j,$cost) ($j >= $N)";
-    }
-    $self->_cost->{$i}{$j} = $cost;
+    croak "ERROR: set_cost($i,$j,$cost) ($cost <= 0)"
+        unless $cost > 0;
+    croak "ERROR: set_cost($i,$j,$cost) ($i >= $j)"
+        unless $i < $j;
+    croak "ERROR: set_cost($i,$j,$cost) ($j >= @{[ $self->N ]})"
+        unless $j < $self->N;
+    $self->_tour->{$i}{$j}{cost} = $cost;
+}
+
+
+=head2 $b->points($i,$j)
+
+Returns the points in the bitonic tour from point C<$i> to C<$j>.
+
+=cut
+
+sub points {
+    my ($self, $i, $j) = @_;
+    croak "Don't know the points for tour($i,$j)"
+        unless exists $self->_tour->{$i}{$j}{points};
+    return @{ $self->_tour->{$i}{$j}{points} };
+}
+
+=head2 $b->set_points($i,$j,@points)
+
+Sets the points for the tour with endpoints C<$i> and C<$j>.
+
+=cut
+
+sub set_points {
+    my ($self, $i, $j, @points) = @_;
+    local $" = q{,};
+    croak "ERROR: set_points($i,$j,@points) (no points)"
+        unless @points > 0;
+    croak "ERROR: set_points($i,$j,@points) ($i >= $j)"
+        unless $i < $j;
+    croak "ERROR: set_points($i,$j,@points) ($j >= @{[ $self->N ]})"
+        unless $j < $self->N;
+    croak "ERROR: set_points($i,$j,@points) ($i != first point)"
+        unless $i == $points[0];
+    croak "ERROR: set_points($i,$j,@points) ($j != last point)"
+        unless $j == $points[-1];
+    $self->_tour->{$i}{$j}{points} = \@points;
 }
 
 =head2 $b->delta($n1,$n2);

@@ -3,6 +3,7 @@ Changes
 example/bitonic-1.jpg
 example/bitonic-2.jpg
 example/cb.pl
+example/README
 lib/Algorithm/TravelingSalesman/BitonicTour.pm
 Makefile.PL
 MANIFEST
