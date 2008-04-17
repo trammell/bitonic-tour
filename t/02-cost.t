@@ -20,9 +20,15 @@ is_deeply( [$b->sorted_points], [[0,0], [1,1], [2,1], [3,0]] );
 $b->populate_partial_tours;
 #diag(Dumper($b));
 
-# make sure invalid cost queries throw an exception
-throws_ok { $b->cost(42,142) } qr/Don't know the cost of tour\(42,142\)/,
-    'invalid cost dies';
+# make sure invalid tour queries throw an exception
+throws_ok { $b->tour_cost(42,142) } qr/ERROR/, 'die on invalid cost limits';
+throws_ok { $b->tour_cost(0,1,-1) } qr/ERROR/, 'die on invalid cost';
+throws_ok { $b->optimal_partial_tour(1,0) } qr/ERROR/, 'die on invalid tour limits';
+
+{
+    my @tour = $b->optimal_partial_tour(0,2);
+    is (sprintf('%.3f',$tour[0]), 2.414);
+}
 
 # verify calculated costs and paths
 {
@@ -35,8 +41,8 @@ throws_ok { $b->cost(42,142) } qr/Don't know the cost of tour\(42,142\)/,
         [ 2,3 => 5.41 => 2, 1, 0, 3 ],
     );
 
-    my $c = sub { 0 + sprintf('%.2f', $b->cost(@_)) };
-    my $p = sub { [ $b->points(@_) ] };
+    my $c = sub { 0 + sprintf('%.2f', $b->tour_cost(@_)) };
+    my $p = sub { [ $b->tour_points(@_) ] };
 
     foreach my $t (@tests) {
         my ($i, $j, $length, @points) = @$t;
