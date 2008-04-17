@@ -18,5 +18,8 @@ $b->add_point(6,1);
 $b->add_point(7,5);
 $b->add_point(8,2);
 
-print $b->solve;
+my ($length, @tour) = $b->solve;
+
+print "optimal tour length: $length\n";
+print "optimal tour points: @tour\n";
 
