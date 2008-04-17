@@ -8,7 +8,7 @@ use_ok('Algorithm::TravelingSalesman::BitonicTour');
 my $b = Algorithm::TravelingSalesman::BitonicTour->new;
 is($b->N, 0);
 dies_ok { $b->R } 'call to R() with no points should die...';
-throws_ok { $b->R } qr/No rightmost point/, '... with a nice error message';
+throws_ok { $b->R } qr/Problem has no rightmost point/, '... with a nice error message';
 
 $b->add_point(0,0);
 is($b->N, 1);
