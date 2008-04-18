@@ -2,7 +2,7 @@
 name: Algorithm-TravelingSalesman-BitonicTour
 version: 0.01
 author:
-  - 'John Trammell <johntrammell -at- gmail.com>'
+  - 'John Trammell <johntrammell -at- gmail (dot) com>'
 abstract: solve the euclidean traveling-salesman problem with bitonic tours
 license: perl
 resources:
@@ -21,8 +21,6 @@ provides:
   Algorithm::TravelingSalesman::BitonicTour:
     file: lib/Algorithm/TravelingSalesman/BitonicTour.pm
     version: 0.01
-  Algorithm::TravelingSalesman::BitonicTour::Solution:
-    file: lib/Algorithm/TravelingSalesman/BitonicTour.pm
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

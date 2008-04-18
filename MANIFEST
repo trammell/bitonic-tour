@@ -15,6 +15,7 @@ t/02-cost.t
 t/10-solve-0.t
 t/11-solve-1.t
 t/12-solve-N.t
+t/13-solve-N.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
