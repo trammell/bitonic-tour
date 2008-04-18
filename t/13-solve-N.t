@@ -13,13 +13,23 @@ use_ok('Algorithm::TravelingSalesman::BitonicTour');
     $b->add_point(@$_) for points();
     my ($length, @points) = $b->solve;
     is(sprintf('%.3f', $length), 6.282, 'known correct length');
+
     my $points = do {
-        my @p = @points[ 0 .. $#points - 1 ];
-        "@p @p";
+        my @p = map "[@$_[0],@$_[1]]", @points[ 0 .. $#points - 1 ];
+        join q( ), @p, @p;
     };
-    like($points, qr/(0 2 4 6 8 10|10 8 6 4 2 0)/);
-    like($points, qr/(1 3 5 7 9|9 7 5 3 1)/);
-    diag "$length @points";
+
+    my $correct_re = do {
+        my @correct = map quotemeta, map { "[@$_[0],@$_[1]]" } points();
+        my $pat = "@correct|@{[ reverse @correct ]}";
+        qr/$pat/;
+    };
+    like($points, $correct_re);
+    #diag "length=$length";
+    #diag Dumper(@points);
+    #like($points, qr/(0 2 4 6 8 10|10 8 6 4 2 0)/);
+    #like($points, qr/(1 3 5 7 9|9 7 5 3 1)/);
+    #diag "$length @points";
 }
 
 sub points {
