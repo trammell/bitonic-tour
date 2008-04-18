@@ -33,6 +33,7 @@ throws_ok { $b->tour(1,0) } qr/ERROR/, 'die on invalid tour limits';
 throws_ok { $b->tour_cost(42,142) } qr/ERROR/, 'die on invalid cost limits';
 throws_ok { $b->tour_cost(0,1,-1) } qr/ERROR/, 'die on invalid cost';
 throws_ok { $b->optimal_partial_tour(1,0) } qr/ERROR/, 'die on invalid tour limits';
+throws_ok { $b->optimal_partial_tour(1.5,2) } qr/ERROR/, 'die on invalid tour limits';
 
 {
     my @tour = $b->optimal_partial_tour(1,2);
