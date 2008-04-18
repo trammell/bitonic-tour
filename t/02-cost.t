@@ -16,15 +16,28 @@ $b->add_point(3,0);
 is($b->N, 4);
 is_deeply( [$b->sorted_points], [[0,0], [1,1], [2,1], [3,0]] );
 
+# costs not populated yet...
+throws_ok { $b->tour_cost(1,2) } qr/Don't know the cost/, 'die on unpopulated tour cost';
+throws_ok { $b->tour_points(1,2) } qr/Don't know the points/, 'die on unpopulated tour points';
+
+# make sure population with bad endpoints is caught...
+throws_ok { $b->tour_points(1,2,0,2) } qr/ERROR/, 'die on bad endpoints';
+throws_ok { $b->tour_points(1,2,1,3) } qr/ERROR/, 'die on bad endpoints';
+
 # populate optimal costs array
 $b->populate_partial_tours;
 #diag(Dumper($b));
 
 # make sure invalid tour queries throw an exception
+throws_ok { $b->tour(1,0) } qr/ERROR/, 'die on invalid tour limits';
 throws_ok { $b->tour_cost(42,142) } qr/ERROR/, 'die on invalid cost limits';
 throws_ok { $b->tour_cost(0,1,-1) } qr/ERROR/, 'die on invalid cost';
 throws_ok { $b->optimal_partial_tour(1,0) } qr/ERROR/, 'die on invalid tour limits';
 
+{
+    my @tour = $b->optimal_partial_tour(1,2);
+    is (sprintf('%.2f',$tour[0]), 3.65);
+}
 {
     my @tour = $b->optimal_partial_tour(0,2);
     is (sprintf('%.3f',$tour[0]), 2.414);
