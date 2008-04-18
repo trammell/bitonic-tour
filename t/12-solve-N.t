@@ -17,10 +17,16 @@ use_ok('Algorithm::TravelingSalesman::BitonicTour');
     my ($length, @points) = $b->solve;
     is(sprintf('%.3f', $length), 6.828, 'known correct length');
     my $points = do {
-        my @p = @points[ 0 .. $#points - 1 ];
-        "@p @p";
+        my @p = map "[@$_[0],@$_[1]]", @points[ 0 .. $#points - 1 ];
+        join q( ), @p, @p;
     };
-    like($points, qr/(0 1 2 3 0|0 3 2 1 0)/);
-    diag "$length @points";
+    my $correct_re = do {
+        my @correct = map quotemeta, ('[0,0]','[1,1]','[2,1]','[3,0]');
+        my $pat = "@correct|@{[ reverse @correct ]}";
+        qr/$pat/;
+    };
+    like($points, $correct_re);
+    #diag "length=$length";
+    #diag Dumper(@points);
 }
 
