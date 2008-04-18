@@ -281,7 +281,7 @@ sub solve {
         croak "FAIL: you need to add some points!";
     }
     elsif ($self->N == 1) {
-        $length = 0;
+        ($length, @points) = (0, 0);
     }
     else {
         ($length, @points) = $self->optimal_full_tour;
@@ -448,9 +448,12 @@ sub tour_cost {
             unless $_[0] > 0;
         $self->tour($i,$j)->{cost} = $_[0];
     }
-    croak "Don't know the cost of tour($i,$j)"
-        unless exists $self->tour($i,$j)->{cost};
-    return $self->tour($i,$j)->{cost};
+    if (exists $self->tour($i,$j)->{cost}) {
+        return $self->tour($i,$j)->{cost};
+    }
+    else {
+        croak "Don't know the cost of tour($i,$j)";
+    }
 }
 
 =head2 $b->tour_points($i,$j, [@points])
@@ -470,9 +473,12 @@ sub tour_points {
             unless $j == $_[-1];
         $self->tour($i,$j)->{points} = [ @_ ];
     }
-    croak "Don't know the points for tour($i,$j)"
-        unless exists $self->tour($i,$j)->{points};
-    return @{ $self->tour($i,$j)->{points} };
+    if (exists $self->tour($i,$j)->{points}) {
+        return @{ $self->tour($i,$j)->{points} };
+    }
+    else {
+        croak "Don't know the points for tour($i,$j)";
+    }
 }
 
 =head2 $b->delta($n1,$n2);
