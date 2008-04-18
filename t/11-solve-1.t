@@ -14,6 +14,6 @@ for (1 .. 10) {
     $b->add_point($x,$y);
     my @solution;
     lives_ok { @solution = $b->solve };
-    is_deeply(\@solution, [0,0]) or diag(Dumper($b));
+    is_deeply(\@solution, [0, [$x, $y ]]) or diag(Dumper($b));
 }
 
