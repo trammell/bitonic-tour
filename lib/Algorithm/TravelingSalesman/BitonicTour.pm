@@ -286,7 +286,8 @@ sub solve {
     else {
         ($length, @points) = $self->optimal_full_tour;
     }
-    return ($length, @points);
+    my @coordinates = map { [ $self->coord($_) ] } @points;
+    return ($length, @coordinates);
 }
 
 =head2 $ts->optimal_full_tour
